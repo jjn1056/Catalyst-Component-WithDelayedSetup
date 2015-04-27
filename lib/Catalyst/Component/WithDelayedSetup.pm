@@ -4,13 +4,11 @@ use Moose::Role;
 our $VERSION = '0.001';
 
 around 'COMPONENT', sub {
-  my ($orig, $class, $app, @args) = @_;
-  return bless sub { $class->$orig($app, @args) }, $class;
+  my ($orig, $class, @args) = @_;
+  return bless sub { $class->$orig(@args) }, $class;
 };
 
-sub ACCEPT_CONTEXT {
-  my ($self, $c, @args) = @_;
-  return our $ONCE ||= $self->();
+sub ACCEPT_CONTEXT { return our $ONCE ||= shift->();
 }
 
 1;
