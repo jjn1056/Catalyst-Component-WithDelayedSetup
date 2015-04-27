@@ -1,16 +1,33 @@
 package Catalyst::Component::WithDelayedSetup;
 
 use Moose::Role;
-our $VERSION = '0.001';
+our $VERSION = '0.002';
+
+{
+  package Catalyst::Component::Deferred;
+
+  use Moose;
+
+  has setup => (is=>'ro', required=>1, isa=>'CodeRef');
+
+  has target => (
+    is => 'ro',
+    init_arg => undef,
+    lazy => 1,
+    isa => 'Object',
+    required => 1,
+    default => sub { shift->setup->() } );
+
+  sub ACCEPT_CONTEXT { return shift->target }
+}
+
+use Catalyst::Component::Deferred;
 
 around 'COMPONENT', sub {
   my ($orig, $class, @args) = @_;
-  return bless sub { $class->$orig(@args) }, $class;
+  return Catalyst::Component::Deferred
+    ->new( setup => sub { $class->$orig(@args) });
 };
-
-my $ONCE;
-
-sub ACCEPT_CONTEXT { $ONCE ||= shift->() }
 
 1;
 
