@@ -8,8 +8,7 @@ around 'COMPONENT', sub {
   return bless sub { $class->$orig(@args) }, $class;
 };
 
-sub ACCEPT_CONTEXT { return our $ONCE ||= shift->();
-}
+sub ACCEPT_CONTEXT { our $ONCE ||= shift->() }
 
 1;
 
